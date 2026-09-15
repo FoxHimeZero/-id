@@ -1,1 +1,6 @@
-
+id=widevine-spoof
+name=Widevine DRM ID 伪装
+version=1.0
+versionCode=1
+author=you
+description=伪装 Widevine deviceUniqueId，重启不变，点按钮换新
