@@ -1,1 +1,33 @@
+name: Build Zygisk Module
+on: [push, workflow_dispatch]
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 下载 And64InlineHook 源码
+        run: |
+          mkdir -p jni/And64InlineHook
+          cd jni/And64InlineHook
+          curl -fL -o And64InlineHook.hpp \
+            https://raw.githubusercontent.com/Rprop/And64InlineHook/master/And64InlineHook.hpp
+          curl -fL -o And64InlineHook.cpp \
+            https://raw.githubusercontent.com/Rprop/And64InlineHook/master/And64InlineHook.cpp
+
+      - name: 安装 NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26b
+
+      - name: 编译
+        run: |
+          cd jni
+          ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk
+
+      - name: 上传结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: zygisk-libs
+          path: jni/libs/arm64-v8a/libwidevine-spoof.so
