@@ -5,16 +5,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: 下载仓库代码
+        uses: actions/checkout@v4
 
       - name: 下载 And64InlineHook 源码
         run: |
+          rm -rf jni/And64InlineHook
           mkdir -p jni/And64InlineHook
           cd jni/And64InlineHook
           curl -fL -o And64InlineHook.hpp \
             https://raw.githubusercontent.com/Rprop/And64InlineHook/master/And64InlineHook.hpp
           curl -fL -o And64InlineHook.cpp \
             https://raw.githubusercontent.com/Rprop/And64InlineHook/master/And64InlineHook.cpp
+          ls -la
 
       - name: 安装 NDK
         uses: nttld/setup-ndk@v1
@@ -24,7 +27,18 @@ jobs:
       - name: 编译
         run: |
           cd jni
-          ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk
+          ndk-build \
+            NDK_PROJECT_PATH=. \
+            APP_BUILD_SCRIPT=Android.mk \
+            APP_ABI=arm64-v8a \
+            APP_PLATFORM=android-29 \
+            APP_STL=c++_static \
+            APP_CPPFLAGS="-fexceptions -frtti" \
+            V=1
+
+      - name: 检查产物
+        run: |
+          ls -la jni/libs/arm64-v8a/ || true
 
       - name: 上传结果
         uses: actions/upload-artifact@v4
